@@ -93,8 +93,13 @@ export default function BookingPage() {
       setTimeout(() => navigate('/my-bookings'), 2500);
     } catch (err) {
       if (err.status === 409) {
-        toast.error('Slot just taken! Please pick another.', { icon: '⚠️', duration: 4000 });
-        navigate(-1);
+        // Slot is already booked — show the exact server message so it's crystal clear
+        toast.error(err.message || 'This slot is already booked. Please choose a different one.', {
+          icon: '🚫',
+          duration: 5000,
+        });
+        // Small delay so user can read the toast before navigating back
+        setTimeout(() => navigate(-1), 1500);
       } else if (err.status === 422) {
         const fieldErrors = {};
         err.data?.errors?.forEach(({ field, message }) => { fieldErrors[field] = message; });

@@ -24,32 +24,32 @@ const Expert  = require('../models/Expert');
  * - notes field defaults to empty string — never unset.
  */
 const createBooking = async (req, res, next) => {
-  try {
-    const { expertId, name, email, phone, date, timeSlot, notes } = req.body;
+  const { expertId, name, email, phone, date, timeSlot, notes } = req.body;
+  let slotRemoved = false; // track slot removal so we can restore it if booking creation fails
 
+  try {
     // ── Layer 2: Atomic slot removal ──────────────────────────────────────
-    // Atomically find the expert AND remove the specific slot in one operation.
-    // If the slot is already gone (concurrent booking), updatedExpert is null.
     const updatedExpert = await Expert.findOneAndUpdate(
       {
         _id: expertId,
-        'availableSlots': {
-          $elemMatch: { date: date, slots: timeSlot }
-        }
+        'availableSlots': { $elemMatch: { date: date, slots: timeSlot } }
       },
       { $pull: { 'availableSlots.$.slots': timeSlot } },
-      { new: false } // we don't need the updated doc, just need to know it matched
+      { new: false }
     );
 
     if (!updatedExpert) {
-      // Either expert doesn't exist OR this slot was already taken
+      // Slot already booked by someone else or expert doesn't exist
       return res.status(409).json({
         success: false,
-        message: 'This time slot is no longer available. Please choose a different slot.',
+        message: 'This time slot is already booked. Please go back and choose a different slot.',
       });
     }
 
-    // ── Layer 3: Create booking — unique index is the last guard ──────────
+    // Mark slot as removed — if anything below fails we must restore it
+    slotRemoved = true;
+
+    // ── Layer 3: Create booking — unique index is the final guard ─────────
     const booking = await Booking.create({
       expert:   expertId,
       name:     name.trim(),
@@ -60,13 +60,15 @@ const createBooking = async (req, res, next) => {
       notes:    (notes || '').trim(),
     });
 
+    // Booking created successfully — slot is permanently taken
+    slotRemoved = false;
+
     // ── Real-time: Notify all connected clients ───────────────────────────
     const io = req.app.get('io');
     if (io) {
       io.emit('slotBooked', { expertId, date, timeSlot });
     }
 
-    // Respond with populated booking (never expose raw __v or internal fields)
     const populated = await booking.populate('expert', 'name category');
 
     return res.status(201).json({
@@ -81,12 +83,27 @@ const createBooking = async (req, res, next) => {
         createdAt: populated.createdAt,
       },
     });
+
   } catch (error) {
-    // Duplicate-key — Layer 3 fired (should be extremely rare given Layer 2)
+    // ── Rollback: restore the slot if Booking.create() failed ─────────────
+    // Prevents slots from permanently disappearing when booking creation fails
+    if (slotRemoved) {
+      try {
+        await Expert.updateOne(
+          { _id: expertId, 'availableSlots.date': date },
+          { $addToSet: { 'availableSlots.$.slots': timeSlot } }
+        );
+        console.warn(`⚠️  Slot restored: expert ${expertId} — ${date} ${timeSlot}`);
+      } catch (restoreErr) {
+        console.error('❌ Failed to restore slot after booking error:', restoreErr);
+      }
+    }
+
+    // Duplicate-key — two concurrent requests raced past Layer 2
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
-        message: 'This time slot has just been booked by someone else. Please choose a different slot.',
+        message: 'This time slot was just taken by someone else. Please choose a different slot.',
       });
     }
     next(error);
