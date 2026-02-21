@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0f0f1a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #1a1a2e; }
+::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+/* ── Glassmorphism card ────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+}
+
+/* ── Gradient text ─────────────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Button shimmer ────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #6366f1);
+  background-size: 200% auto;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background-position: right center;
+  animation: shimmer 1.5s linear infinite;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Danger button ─────────────────────────────────────────────────────────── */
+.btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+.btn-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Slot button ───────────────────────────────────────────────────────────── */
+.slot-btn {
+  transition: all 0.2s ease;
+}
+.slot-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+/* Slot fade-out animation (real-time booking) */
+@keyframes slotFadeOut {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.3; transform: scale(0.95); background: rgba(239,68,68,0.2); }
+  100% { opacity: 0.4; transform: scale(0.95); }
+}
+.slot-just-booked {
+  animation: slotFadeOut 0.6s ease-out forwards;
+}
+
+/* ── Page fade-in ──────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── Skeleton loading ──────────────────────────────────────────────────────── */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+.skeleton {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  animation: skeletonPulse 1.6s ease-in-out infinite;
+}
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+/* ── Status badges ─────────────────────────────────────────────────────────── */
+.badge-pending   { background: rgba(234,179,8,0.15);  color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+.badge-confirmed { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+.badge-completed { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.badge-cancelled { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+/* ── Input focus ───────────────────────────────────────────────────────────── */
+input, textarea, select { -webkit-appearance: none; appearance: none; }
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ── Expert card hover ─────────────────────────────────────────────────────── */
+.expert-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.expert-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+/* ── Live dot pulse ────────────────────────────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — all breakpoints
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── ≤768px tablet/mobile ── */
+@media (max-width: 768px) {
+  /* Page padding */
+  .page-enter {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-top: 24px !important;
+  }
+
+  /* Expert card: disable lift hover on touch */
+  .expert-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Booking summary strip — stack vertically */
+  .booking-summary-strip {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  /* Expert detail profile — stack on mobile */
+  .expert-profile-card {
+    flex-direction: column !important;
+    gap: 20px !important;
+    align-items: flex-start !important;
+  }
+
+  /* My Bookings card — stack badge below info */
+  .booking-card-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  /* Right side of booking card (status + cancel) — row on mobile */
+  .booking-card-actions {
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+}
+
+/* ── ≤480px phone ── */
+@media (max-width: 480px) {
+  /* Reduce heading sizes */
+  h1 { font-size: clamp(22px, 7vw, 32px) !important; }
+
+  /* Form glass card padding */
+  .glass-card { border-radius: 12px; }
+
+  /* Make all buttons full width in forms */
+  .btn-full-mobile { width: 100% !important; }
+
+  /* Slot buttons wrap nicely */
+  .slots-grid { gap: 8px !important; }
+  .slot-btn   { padding: 7px 14px !important; font-size: 13px !important; }
+
+  /* Category filter chips — smaller */
+  .filter-chip { padding: 5px 12px !important; font-size: 12px !important; }
+
+  /* Stats row in expert card */
+  .expert-stats { padding: 8px !important; }
+
+  /* ExpertDetail stats row items */
+  .expert-stat-item { font-size: 11px !important; }
+}
