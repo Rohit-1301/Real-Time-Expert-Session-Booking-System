@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // In development, Vite proxies /experts and /bookings so baseURL can be empty.
-// In production, VITE_API_URL points to the deployed backend (e.g. Render URL).
+// In production, set VITE_API_URL in Vercel environment variables.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '',
   timeout: 10000,
