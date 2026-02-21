@@ -132,16 +132,20 @@ const seed = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Connected to MongoDB');
 
-    await Booking.deleteMany({});
-    await Expert.deleteMany({});
-    console.log('🗑  Cleared existing data');
+    // Only seed if the database is empty — prevents wiping real data on re-deploy
+    const existingCount = await Expert.countDocuments();
+    if (existingCount > 0) {
+      console.log(`ℹ️  Database already has ${existingCount} experts — skipping seed.`);
+      await mongoose.disconnect();
+      process.exit(0);
+    }
 
     const experts = await Expert.insertMany(expertsData);
     console.log(`🌱 Seeded ${experts.length} experts`);
-
     console.log('✅ Database seeded successfully!');
   } catch (err) {
     console.error('❌ Seed error:', err);
+    process.exit(1);
   } finally {
     await mongoose.disconnect();
     process.exit(0);
